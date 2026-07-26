@@ -1,3 +1,22 @@
+/*
+===============================================================================
+Stored Procedure: Load Silver Layer (Bronze -> Silver)
+===============================================================================
+Script Purpose:
+    This stored procedure transform and load data from bronze schema into the
+    'silver' schema. It performs the following actions:
+    - Clean and transform the data from bronze layer.
+    - INSERT the transformed data into the silver layer.
+
+Parameters:
+    None.
+    This stored procedure does not accept any parameters and does not
+    return any values.
+
+Usage:
+    EXEC silver.load_silver;
+===============================================================================
+*/
 CREATE OR ALTER PROCEDURE silver.load_silver AS
 BEGIN
 	DECLARE @start_time DATETIME, @end_time DATETIME, @silver_start_time DATETIME, @silver_end_time DATETIME
