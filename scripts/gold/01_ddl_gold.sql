@@ -1,4 +1,22 @@
------- CUSTOMER OBJECT (DIMENSION) --------------------------------------
+/*
+===============================================================================
+DDL Script: Create Gold Views
+===============================================================================
+Script Purpose:
+    This script creates views for the Gold layer in the data warehouse. 
+    The Gold layer represents the final dimension and fact tables (Star Schema)
+
+    Each view performs transformations and combines data from the Silver layer 
+    to produce a clean, enriched, and business-ready dataset.
+
+Usage:
+    - These views can be queried directly for analytics and reporting.
+===============================================================================
+*/
+
+-- ==========================================================================
+-- Create Dimension: gold.dim_customer
+-- ==========================================================================
 CREATE OR ALTER VIEW gold.dim_customers AS
 SELECT
 	ROW_NUMBER() OVER(ORDER BY ca.cst_id)	AS customer_key, -- Surrogate key
@@ -21,7 +39,9 @@ LEFT JOIN silver.erp_loc_a101 la
 	ON ca.cst_key = la.cid;
 GO
 
------------ DIMENSION PRODUCT VIEW --------------------------------
+-- =============================================================================
+-- Create Dimension: gold.dim_products
+-- =============================================================================
 CREATE OR ALTER VIEW gold.dim_products AS
 SELECT
 	ROW_NUMBER() OVER(ORDER BY pn.prd_start_dt, pn.prd_key)	AS product_key,		-- Surrogate key
@@ -41,7 +61,9 @@ LEFT JOIN silver.erp_px_cat_g1v2 pc
 WHERE pn.prd_end_dt IS NULL;		-- Filter out historical data
 GO
 
------------ FACT SALES VIEW -----------------------------------
+-- =============================================================================
+-- Create Fact Table: gold.fact_sales
+-- =============================================================================
 CREATE OR ALTER VIEW gold.fact_sales AS
 SELECT
 	sd.sls_ord_num				AS order_number,
