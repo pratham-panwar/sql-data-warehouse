@@ -1,69 +1,87 @@
 # SQL Data Warehouse Project
 
-## Overview
+A modern **SQL Server Data Warehouse** built using the **Medallion Architecture (Bronze, Silver, Gold)** to transform raw CRM and ERP data into analytics-ready datasets.
 
-This project demonstrates the design and implementation of a modern **Data Warehouse** using **Microsoft SQL Server**. It follows the **Medallion Architecture** (Bronze, Silver, and Gold layers) to transform raw operational data into clean, business-ready analytical datasets.
-
-The project showcases industry best practices in data engineering, including data ingestion, cleansing, transformation, dimensional modeling, and the creation of analytical views using a Star Schema.
+The project demonstrates industry-standard data warehousing concepts including ETL pipelines, data cleansing, dimensional modeling, and Star Schema design using **T-SQL**.
 
 ---
 
 ## Architecture
 
-The data warehouse is organized into three logical layers:
+The warehouse follows a three-layer Medallion Architecture:
 
-### Bronze Layer (Raw Data)
-
-* Stores raw data exactly as received from source systems.
-* Serves as the landing zone for ingestion.
-* Preserves the original data for auditing and reprocessing.
-
-### Silver Layer (Cleaned Data)
-
-* Cleanses and standardizes raw data.
-* Removes duplicates.
-* Handles missing or inconsistent values.
-* Applies business rules and data quality checks.
-
-### Gold Layer (Business Layer)
-
-* Presents analytics-ready data.
-* Implements dimensional modeling.
-* Contains fact and dimension views following a Star Schema.
-* Optimized for reporting and business intelligence tools.
+```
+          Source Systems
+        (CRM & ERP Data)
+                │
+                ▼
+        ┌────────────────┐
+        │     Bronze     │
+        │   Raw Data     │
+        └────────────────┘
+                │
+                ▼
+        ┌────────────────┐
+        │     Silver     │
+        │ Cleaned Data   │
+        └────────────────┘
+                │
+                ▼
+        ┌────────────────┐
+        │      Gold      │
+        │ Business Views │
+        └────────────────┘
+                │
+                ▼
+       Reporting & Analytics
+```
 
 ---
 
 ## Project Structure
 
 ```text
-SQL-Data-Warehouse/
+sql-data-warehouse/
 │
 ├── datasets/
 │   ├── source_crm/
+│   │   ├── cust_info.csv
+│   │   ├── prd_info.csv
+│   │   └── sales_details.csv
+│   │
 │   └── source_erp/
-│
-├── scripts/
-│   ├── bronze/
-│   │   ├── ddl_bronze.sql
-│   │   └── load_bronze.sql
-│   │
-│   ├── silver/
-│   │   ├── ddl_silver.sql
-│   │   └── load_silver.sql
-│   │
-│   ├── gold/
-│   │   ├── dim_customers.sql
-│   │   ├── dim_products.sql
-│   │   └── fact_sales.sql
-│   │
-│   └── tests/
+│       ├── CUST_AZ12.csv
+│       ├── LOC_A101.csv
+│       └── PX_CAT_G1V2.csv
 │
 ├── docs/
-│   ├── architecture.png
-│   ├── erd.png
-│   └── data_flow.png
+│   ├── data_architecture.png
+│   ├── data_flow.png
+│   ├── data_layers.png
+│   ├── data_model.png
+│   └── naming_conventions.md
 │
+├── scripts/
+│   ├── 01_init_database.sql
+│   │
+│   ├── bronze/
+│   │   ├── 01_ddl_bronze.sql
+│   │   ├── 02_proc_load_bronze.sql
+│   │   └── 03_load_bronze.sql
+│   │
+│   ├── silver/
+│   │   ├── 01_ddl_silver.sql
+│   │   ├── 02_proc_load_silver.sql
+│   │   └── 03_load_silver.sql
+│   │
+│   └── gold/
+│       └── 01_ddl_gold.sql
+│
+├── tests/
+│   ├── quality_checks_silver.sql
+│   └── quality_checks_gold.sql
+│
+├── .gitignore
 └── README.md
 ```
 
@@ -71,84 +89,100 @@ SQL-Data-Warehouse/
 
 ## Technologies Used
 
-* Microsoft SQL Server
-* SQL Server Management Studio (SSMS)
-* T-SQL
-* Git
-* GitHub
+- Microsoft SQL Server
+- SQL Server Management Studio (SSMS)
+- T-SQL
+- Git
+- GitHub
 
 ---
 
-## Data Warehouse Workflow
+## Data Warehouse Layers
+
+### Bronze Layer
+
+The Bronze layer stores raw data exactly as received from the source systems.
+
+- Loads CRM and ERP datasets
+- Preserves source data
+- Supports auditing and reprocessing
+
+---
+
+### Silver Layer
+
+The Silver layer transforms and cleans the raw data.
+
+Transformations include:
+
+- Data cleansing
+- Standardizing values
+- Removing duplicates
+- Handling missing values
+- Applying business rules
+- Preparing clean datasets for analytics
+
+---
+
+### Gold Layer
+
+The Gold layer exposes business-ready views following a **Star Schema**.
+
+### Dimension Views
+
+- `gold.dim_customers`
+- `gold.dim_products`
+
+### Fact View
+
+- `gold.fact_sales`
+
+The Gold layer includes:
+
+- Surrogate key generation using `ROW_NUMBER()`
+- Customer enrichment from CRM and ERP sources
+- Product categorization
+- Analytics-ready sales fact view
+
+---
+
+## ETL Workflow
 
 ```
-Source Systems
-      │
-      ▼
- Bronze Layer
-      │
-      ▼
- Silver Layer
-      │
-      ▼
- Gold Layer
-      │
-      ▼
- Reporting & Analytics
+CRM + ERP Source Files
+          │
+          ▼
+ Bronze Stored Procedures
+          │
+          ▼
+ Bronze Tables
+          │
+          ▼
+ Silver Stored Procedures
+          │
+          ▼
+ Silver Tables
+          │
+          ▼
+ Gold Views
+          │
+          ▼
+ Business Analytics
 ```
 
 ---
 
-## Data Modeling
+## Features
 
-The Gold layer follows a **Star Schema** consisting of:
-
-### Dimension Tables
-
-* Dim Customers
-* Dim Products
-
-### Fact Table
-
-* Fact Sales
-
-This design minimizes joins, improves query performance, and simplifies analytical reporting.
-
----
-
-## ETL Process
-
-### 1. Extract
-
-* Load raw CRM and ERP datasets into the Bronze layer.
-
-### 2. Transform
-
-* Standardize formats.
-* Remove duplicates.
-* Handle null values.
-* Apply business rules.
-* Generate surrogate keys where appropriate.
-
-### 3. Load
-
-* Populate dimension views.
-* Build fact views.
-* Prepare analytics-ready datasets.
-
----
-
-## Key Features
-
-* Layered Medallion Architecture
-* Data quality validation
-* Modular SQL scripts
-* Reusable views
-* Dimensional modeling
-* Star Schema implementation
-* Surrogate key generation
-* Git version control
-* Well-organized project structure
+- Medallion Architecture
+- Layered ETL pipeline
+- Modular SQL scripts
+- Stored Procedures for data loading
+- Star Schema implementation
+- Dimension and Fact views
+- Surrogate key generation
+- Data transformation using T-SQL
+- Version controlled with Git
 
 ---
 
@@ -156,72 +190,79 @@ This design minimizes joins, improves query performance, and simplifies analytic
 
 ### Prerequisites
 
-* Microsoft SQL Server
-* SQL Server Management Studio (SSMS)
-* Git
+- Microsoft SQL Server
+- SQL Server Management Studio (SSMS)
 
 ### Clone the Repository
 
 ```bash
-git clone https://github.com/<your-username>/<repository-name>.git
+git clone https://github.com/pratham-panwar/sql-data-warehouse.git
 ```
 
-### Open the Project
+### Execute the Scripts
 
-1. Open SSMS.
-2. Connect to your SQL Server instance.
-3. Execute the scripts in the following order:
+Run the SQL scripts in the following order:
 
 ```
-1. Bronze DDL
-2. Bronze Load
+1. scripts/01_init_database.sql
 
-3. Silver DDL
-4. Silver Load
+2. scripts/bronze/
+   - 01_ddl_bronze.sql
+   - 02_proc_load_bronze.sql
+   - 03_load_bronze.sql
 
-5. Gold Views
+3. scripts/silver/
+   - 01_ddl_silver.sql
+   - 02_proc_load_silver.sql
+   - 03_load_silver.sql
+
+4. scripts/gold/
+   - 01_ddl_gold.sql
 ```
+
+> **Note:** Execute the scripts in ascending numerical order.
 
 ---
 
-## Learning Objectives
+## Documentation
 
-This project demonstrates practical knowledge of:
+The `docs/` directory contains supporting documentation and project diagrams:
 
-* Data Warehouse Design
-* ETL Pipelines
-* Medallion Architecture
-* Data Cleansing
-* T-SQL Development
-* Views
-* Stored Procedures
-* Window Functions
-* Dimensional Modeling
-* Star Schema Design
-* Git Workflow
+| File | Description |
+|------|-------------|
+| `data_architecture.png` | High-level architecture of the data warehouse |
+| `data_flow.png` | End-to-end ETL data flow |
+| `data_layers.png` | Medallion Architecture (Bronze, Silver, Gold) |
+| `data_model.png` | Star Schema data model |
+| `naming_conventions.md` | SQL naming standards used throughout the project |
 
 ---
 
-## Future Improvements
+## Skills Demonstrated
 
-* Incremental data loading
-* Slowly Changing Dimensions (SCD)
-* Index optimization
-* SQL Agent scheduling
-* Data quality dashboards
-* Automated testing
-* CI/CD pipeline integration
+- Data Warehousing
+- ETL Pipeline Development
+- Microsoft SQL Server
+- T-SQL
+- Stored Procedures
+- Views
+- Window Functions
+- Data Cleansing
+- Data Transformation
+- Dimensional Modeling
+- Star Schema Design
+- Git & GitHub
 
 ---
 
-## Repository
+## Future Enhancements
 
-```text
-scripts/
-datasets/
-docs/
-README.md
-```
+- Incremental data loading
+- Slowly Changing Dimensions (SCD)
+- Automated SQL Agent scheduling
+- Performance optimization with indexing
+- Data quality reporting
+- Power BI dashboards
 
 ---
 
@@ -229,4 +270,6 @@ README.md
 
 **Pratham Panwar**
 
-Aspiring Data Engineer with an interest in SQL, Data Warehousing, ETL pipelines, and Analytics Engineering.
+Aspiring Data Engineer passionate about SQL, Data Warehousing, ETL pipelines, and Analytics Engineering.
+
+---
